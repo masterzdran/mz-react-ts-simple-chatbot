@@ -1,5 +1,3 @@
-// src/App.tsx
-import React from 'react';
 import SecureChatbot from './components/SecureChatbot/SecureChatbot';
 import Avatar from '@mui/material/Avatar';
 
@@ -30,9 +28,11 @@ function App() {
           },
           assistantIcon: <Avatar>A</Avatar>, // Example: Material-UI Avatar
            title: "🌟I9 AI🌟",
+           disclaimer: "Chat can make mistakes. Check important info. ",
         }}
         onError={handleChatError}
         onMessageSent={handleMessageSent}
+        language="pt"
       />
     </div>
   );

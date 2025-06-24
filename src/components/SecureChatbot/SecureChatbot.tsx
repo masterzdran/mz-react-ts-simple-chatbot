@@ -18,7 +18,8 @@ import {
   useTheme,
   styled,
 } from '@mui/material';
-import Markdown from 'mui-markdown';
+import i18n from '../../i18n';
+import { useTranslation } from 'react-i18next';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   display: 'flex',
@@ -52,10 +53,15 @@ const StyledInput = styled(Box)(({ theme }) => ({
   borderTop: `1px solid ${theme.palette.divider}`,
 }));
 
-const SecureChatbot: React.FC<ChatbotProps> = ({
+interface SecureChatbotProps extends ChatbotProps {
+  language?: string;
+}
+
+const SecureChatbot: React.FC<SecureChatbotProps> = ({
   config = {},
   onError,
   onMessageSent,
+  language = 'en', // Default language is English
 }) => {
   // State management
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -87,6 +93,13 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
     chatConfig.rateLimit.windowMs
   );
 
+  // i18n
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language]);
+
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -117,16 +130,33 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
 
   const generateMockResponse = useCallback((message: string): string => {
     // Basic mock response logic
-    const responses = [
-      "I'm sorry, I don't have the information to answer that.",
-      "That's an interesting question!",
-      "Let me look that up for you...",
-      "Could you please provide more details?",
-      "Thank you for your input!",
-    ];
-    const index = Math.floor(Math.random() * responses.length);
-    return responses[index] + ` (Mock Response to: ${message})`;
-  }, []);
+    const responses = {
+      en: [
+        t("Sorry, I don't have the information to answer that."),
+        t("That's an interesting question!"),
+        t("Let me look that up for you..."),
+        t("Could you please provide more details?"),
+        t("Thank you for your input!"),
+      ],
+      fr: [
+        t("Désolé, je n'ai pas les informations nécessaires pour répondre à cette question."),
+        t("C'est une question intéressante!"),
+        t("Laissez-moi chercher cela pour vous..."),
+        t("Pourriez-vous fournir plus de détails?"),
+        t("Merci pour votre contribution!"),
+      ],
+      pt: [
+        t("Desculpe, não tenho as informações para responder a isso."),
+        t("Essa é uma pergunta interessante!"),
+        t("Deixe-me procurar isso para você..."),
+        t("Poderia fornecer mais detalhes?"),
+        t("Obrigado pela sua contribuição!"),
+      ],
+    };
+    const currentLanguage = i18n.language || 'en';
+    const index = Math.floor(Math.random() * responses[currentLanguage].length);
+    return responses[currentLanguage][index] + ` (Mock Response to: ${message})`;
+  }, [t]);
 
   // Secure API call
   const sendMessageToAPI = useCallback(async (message: string): Promise<string> => {
@@ -247,14 +277,14 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
     } catch (error) {
       setMessages(prev => prev.map(msg =>
         msg.id === botMessage.id
-          ? { ...msg, content: 'Sorry, I encountered an error. Please try again.', status: 'error' as const }
+          ? { ...msg, content: t("Sorry, I encountered an error. Please try again."), status: 'error' as const }
           : msg
       ));
       handleError(error instanceof Error ? error : new Error('Unknown error'));
     } finally {
       setIsLoading(false);
     }
-  }, [inputValue, chatConfig.maxMessageLength, canSendMessage, recordMessage, onMessageSent, sendMessageToAPI, handleError]);
+  }, [inputValue, chatConfig.maxMessageLength, canSendMessage, recordMessage, onMessageSent, sendMessageToAPI, handleError, t]);
 
   // Handle Enter key
   const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -294,7 +324,7 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
 
   const theme = useTheme();
 
-  const chatbotTitle = chatConfig.title || "Support Chat";
+  const chatbotTitle = chatConfig.title || t("Support Chat");
 
   return (
     <Box
@@ -339,21 +369,21 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
               <IconButton
                 onClick={handleNewSession}
                 color="inherit"
-                aria-label="New Session"
+                aria-label={t("New Session")}
               >
                 <Plus />
               </IconButton>
               <IconButton
                 onClick={toggleMaximize}
                 color="inherit"
-                aria-label={isMaximized ? "Minimize chat" : "Maximize chat"}
+                aria-label={isMaximized ? t("Minimize chat") : t("Maximize chat")}
               >
                 {isMaximized ? <Minimize2 /> : <Maximize2 />}
               </IconButton>
               <IconButton
                 onClick={toggleChatbot}
                 color="inherit"
-                aria-label="Close chat"
+                aria-label={t("Close chat")}
               >
                 <X />
               </IconButton>
@@ -363,7 +393,7 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
           <StyledMessages>
             {messages.length === 0 && (
               <Typography variant="body2" color="textSecondary" align="center">
-                Welcome! How can I help you today?
+                {t("Welcome! How can I help you today?")}
               </Typography>
             )}
             {messages.map((message) => (
@@ -378,10 +408,10 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
                 inputRef={inputRef}
                 fullWidth
                 variant="outlined"
-                placeholder="Type your message..."
+                placeholder={t("Type your message...")}
                 value={inputValue}
                 onChange={handleInputChange}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyPress}
                 disabled={isLoading}
                 inputProps={{ maxLength: chatConfig.maxMessageLength }}
                 autoComplete="off"
@@ -392,14 +422,19 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
                 color="primary"
                 onClick={handleSendMessage}
                 disabled={isLoading || !inputValue.trim()}
-                aria-label="Send message"
+                aria-label={t("Send message")}
               >
                 {isLoading ? <CircularProgress size={24} color="inherit" /> : <Send />}
               </Button>
             </Box>
             <Typography variant="caption" color="textSecondary" sx={{ mt: 1 }}>
-              {inputValue.length}/{chatConfig.maxMessageLength}
+              {inputValue.length}/{chatConfig.maxMessageLength} {t("characters")}
             </Typography>
+            {chatConfig.disclaimer && (
+              <Typography variant="caption" color="textSecondary" sx={{ mt: 1, display: 'block' }}>
+                {chatConfig.disclaimer}
+              </Typography>
+            )}
           </StyledInput>
         </StyledPaper>
       )}
@@ -408,7 +443,7 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
         variant="contained"
         color="primary"
         onClick={toggleChatbot}
-        aria-label={isOpen ? 'Close chat' : 'Open chat'}
+        aria-label={isOpen ? t('Close chat') : t('Open chat')}
         sx={{
           width: 56,
           height: 56,

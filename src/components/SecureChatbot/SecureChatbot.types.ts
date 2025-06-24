@@ -1,5 +1,3 @@
-// src/components/SecureChatbot/SecureChatbot.types.ts
-
 export interface Message {
     id: string;
     content: string;
@@ -20,6 +18,7 @@ export interface Message {
   defaultMaximized?: boolean;
   assistantIcon?: React.ReactNode;
   title?: string;
+  disclaimer?: string;
 }
 
 export interface ChatbotProps {
