@@ -9,22 +9,22 @@ export interface Message {
   }
   
   export interface ChatbotConfig {
-    apiEndpoint?: string;
-    maxMessageLength?: number;
-    rateLimit?: {
-      maxMessages: number;
-      windowMs: number;
-    };
-    allowedOrigins?: string[];
-    csrfToken?: string;
-    defaultMaximized?: boolean;
-    assistantIcon?: React.ReactNode;
-    title?: string; // Add title to config
-  }
-  
-  export interface ChatbotProps {
-    config?: ChatbotConfig;
-    onError?: (error: Error) => void;
-    onMessageSent?: (message: string) => void;
-    onMaximizeChange?: (isMaximized: boolean) => void;
-  }
+  apiEndpoint?: string;
+  maxMessageLength?: number;
+  rateLimit?: {
+    maxMessages: number;
+    windowMs: number;
+  };
+  allowedOrigins?: string[];
+  csrfToken?: string;
+  defaultMaximized?: boolean;
+  assistantIcon?: React.ReactNode;
+  title?: string;
+}
+
+export interface ChatbotProps {
+  config?: ChatbotConfig;
+  onError?: (error: Error) => void;
+  onMessageSent?: (message: string) => void;
+  onMaximizeChange?: (isMaximized: boolean) => void;
+}

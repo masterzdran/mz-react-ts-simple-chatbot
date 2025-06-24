@@ -1,7 +1,7 @@
 // src/components/SecureChatbot/SecureChatbot.tsx
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Send, MessageCircle, X, Shield, AlertTriangle, Maximize2, Minimize2 } from 'lucide-react';
+import { Send, MessageCircle, X, Shield, AlertTriangle, Maximize2, Minimize2, Plus } from 'lucide-react';
 import type { Message, ChatbotProps } from './SecureChatbot.types';
 import { DEFAULT_CHATBOT_CONFIG } from './SecureChatbot.constants';
 import { SecurityUtils } from './SecureChatbot.utils';
@@ -64,6 +64,7 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
   const [inputValue, setInputValue] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'error'>('disconnected');
+  const [sessionId, setSessionId] = useState<string>(SecurityUtils.generateSecureId());
 
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -151,6 +152,7 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
         language: navigator.language,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       })),
+      session_id: sessionId, // Include session_id in the request
     };
 
     try {
@@ -184,7 +186,7 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
       console.error('Error during API call, generating mock response:', error);
       return generateMockResponse(message);
     }
-  }, [chatConfig, generateMockResponse]);
+  }, [chatConfig, generateMockResponse, sessionId]);
 
   // Handle input change with validation
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -273,6 +275,11 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
     setIsMaximized(prev => !prev);
   }, []);
 
+  const handleNewSession = useCallback(() => {
+    setMessages([]); // Clear messages
+    setSessionId(SecurityUtils.generateSecureId()); // Generate a new session ID
+  }, []);
+
   // Status icon based on connection
   const StatusIcon = useMemo(() => {
     switch (connectionStatus) {
@@ -329,6 +336,13 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: theme.spacing(1) }}>
+              <IconButton
+                onClick={handleNewSession}
+                color="inherit"
+                aria-label="New Session"
+              >
+                <Plus />
+              </IconButton>
               <IconButton
                 onClick={toggleMaximize}
                 color="inherit"
