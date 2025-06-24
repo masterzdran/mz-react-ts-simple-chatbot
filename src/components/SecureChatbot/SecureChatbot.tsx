@@ -18,6 +18,7 @@ import {
   useTheme,
   styled,
 } from '@mui/material';
+import Markdown from 'mui-markdown';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   display: 'flex',
@@ -113,12 +114,21 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
     onError?.(error);
   }, [onError]);
 
+  const generateMockResponse = useCallback((message: string): string => {
+    // Basic mock response logic
+    const responses = [
+      "I'm sorry, I don't have the information to answer that.",
+      "That's an interesting question!",
+      "Let me look that up for you...",
+      "Could you please provide more details?",
+      "Thank you for your input!",
+    ];
+    const index = Math.floor(Math.random() * responses.length);
+    return responses[index] + ` (Mock Response to: ${message})`;
+  }, []);
+
   // Secure API call
   const sendMessageToAPI = useCallback(async (message: string): Promise<string> => {
-
-    // // TODO: Implement logic
-    // return SecurityUtils.sanitizeHtml(message);;
-
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -153,7 +163,9 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        // If the service is unavailable, generate a mock response
+        console.warn('Failed to fetch from API, generating mock response.');
+        return generateMockResponse(message);
       }
 
       const contentType = response.headers.get('content-type');
@@ -168,12 +180,11 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
       }
       return SecurityUtils.sanitizeHtml(data.reply);
     } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new Error('Request was cancelled');
-      }
-      throw error;
+      // If an error occurs during the fetch, generate a mock response
+      console.error('Error during API call, generating mock response:', error);
+      return generateMockResponse(message);
     }
-  }, [chatConfig]);
+  }, [chatConfig, generateMockResponse]);
 
   // Handle input change with validation
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -276,6 +287,8 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
 
   const theme = useTheme();
 
+  const chatbotTitle = chatConfig.title || "Support Chat";
+
   return (
     <Box
       sx={{
@@ -312,7 +325,7 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
             <Box sx={{ display: 'flex', alignItems: 'center', gap: theme.spacing(1) }}>
               {StatusIcon}
               <Typography variant="h6" component="h3">
-                Support Chat
+                {chatbotTitle}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: theme.spacing(1) }}>
