@@ -3,6 +3,7 @@
 import React from 'react';
 import { Box, Paper, Typography, CircularProgress, useTheme } from '@mui/material';
 import type { Message } from './SecureChatbot.types';
+import Markdown from 'mui-markdown';
 
 interface MessageBubbleProps {
   message: Message;
@@ -81,7 +82,23 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, assistantIcon })
             }} />
           </Box>
         ) : (
-          <Typography variant="body2">{message.content}</Typography>
+          <Markdown
+            options={{
+              overrides: {
+                img: {
+                  component: (props) => (
+                    <Box
+                      component="img"
+                      sx={{ maxWidth: '100%', height: 'auto' }}
+                      {...props}
+                    />
+                  ),
+                },
+              },
+            }}
+          >
+            {message.content}
+          </Markdown>
         )}
       </Paper>
     </Box>
