@@ -7,6 +7,50 @@ import { DEFAULT_CHATBOT_CONFIG } from './SecureChatbot.constants';
 import { SecurityUtils } from './SecureChatbot.utils';
 import { useRateLimit } from './useRateLimit.hook';
 import MessageBubble from './MessageBubble';
+import {
+  Box,
+  IconButton,
+  TextField,
+  Button,
+  Typography,
+  CircularProgress,
+  Paper,
+  ThemeProvider,
+  useTheme,
+  styled,
+} from '@mui/material';
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  borderRadius: theme.shape.borderRadius,
+  border: `1px solid ${theme.palette.divider}`,
+}));
+
+const StyledHeader = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: theme.spacing(2),
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.primary.contrastText,
+  borderTopLeftRadius: theme.shape.borderRadius,
+  borderTopRightRadius: theme.shape.borderRadius,
+}));
+
+const StyledMessages = styled(Box)(({ theme }) => ({
+  flexGrow: 1,
+  padding: theme.spacing(2),
+  overflowY: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing(1),
+}));
+
+const StyledInput = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(2),
+  borderTop: `1px solid ${theme.palette.divider}`,
+}));
 
 const SecureChatbot: React.FC<ChatbotProps> = ({
   config = {},
@@ -231,92 +275,128 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
     }
   }, [connectionStatus]);
 
+  const theme = useTheme();
+
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <Box
+      sx={{
+        position: 'fixed',
+        bottom: theme.spacing(4),
+        right: theme.spacing(4),
+        zIndex: 50,
+      }}
+    >
       {/* Chat Window */}
       {isOpen && (
-        <div 
-          className={`mb-4 bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col ${
-            isMaximized 
-              ? 'fixed top-4 left-4 right-4 bottom-20 w-auto h-auto' 
-              : 'w-80 h-96'
-          } transition-all duration-300 ease-in-out`}
+        <StyledPaper
+          sx={{
+            mb: theme.spacing(2),
+            width: isMaximized ? 'auto' : 320,
+            height: isMaximized ? 'auto' : 480,
+            maxWidth: isMaximized ? 'calc(100vw - 32px)' : 'auto',
+            maxHeight: isMaximized ? 'calc(100vh - 160px)' : 'auto',
+            position: isMaximized ? 'fixed' : 'static',
+            top: isMaximized ? theme.spacing(4) : 'auto',
+            left: isMaximized ? theme.spacing(4) : 'auto',
+            right: isMaximized ? theme.spacing(4) : 'auto',
+            bottom: isMaximized ? theme.spacing(20) : 'auto',
+            transition: theme.transitions.create(['width', 'height', 'top', 'left', 'right', 'bottom'], {
+              duration: theme.transitions.duration.standard,
+              easing: theme.transitions.easing.easeInOut,
+            }),
+            display: 'flex',
+            flexDirection: 'column',
+          }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 bg-blue-600 text-white rounded-t-lg">
-            <div className="flex items-center space-x-2">
+          <StyledHeader>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: theme.spacing(1) }}>
               {StatusIcon}
-              <h3 className="font-semibold">Support Chat</h3>
-            </div>
-            <div className="flex items-center space-x-2">
-              <button
+              <Typography variant="h6" component="h3">
+                Support Chat
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: theme.spacing(1) }}>
+              <IconButton
                 onClick={toggleMaximize}
-                className="text-white hover:text-gray-200 transition-colors"
+                color="inherit"
                 aria-label={isMaximized ? "Minimize chat" : "Maximize chat"}
               >
-                {isMaximized ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
-              </button>
-              <button
+                {isMaximized ? <Minimize2 /> : <Maximize2 />}
+              </IconButton>
+              <IconButton
                 onClick={toggleChatbot}
-                className="text-white hover:text-gray-200 transition-colors"
+                color="inherit"
                 aria-label="Close chat"
               >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
+                <X />
+              </IconButton>
+            </Box>
+          </StyledHeader>
           {/* Messages */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-3">
+          <StyledMessages>
             {messages.length === 0 && (
-              <div className="text-center text-gray-500 text-sm">
+              <Typography variant="body2" color="textSecondary" align="center">
                 Welcome! How can I help you today?
-              </div>
+              </Typography>
             )}
             {messages.map((message) => (
               <MessageBubble key={message.id} message={message} />
             ))}
             <div ref={messagesEndRef} />
-          </div>
+          </StyledMessages>
           {/* Input */}
-          <div className="p-4 border-t border-gray-200">
-            <div className="flex items-center space-x-2">
-              <input
-                ref={inputRef}
-                type="text"
+          <StyledInput>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: theme.spacing(1) }}>
+              <TextField
+                inputRef={inputRef}
+                fullWidth
+                variant="outlined"
+                placeholder="Type your message..."
                 value={inputValue}
                 onChange={handleInputChange}
                 onKeyPress={handleKeyPress}
-                placeholder="Type your message..."
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                 disabled={isLoading}
-                maxLength={chatConfig.maxMessageLength}
+                inputProps={{ maxLength: chatConfig.maxMessageLength }}
                 autoComplete="off"
                 spellCheck="true"
               />
-              <button
+              <Button
+                variant="contained"
+                color="primary"
                 onClick={handleSendMessage}
                 disabled={isLoading || !inputValue.trim()}
-                className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 aria-label="Send message"
               >
-                <Send className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="mt-1 text-xs text-gray-500">
+                {isLoading ? <CircularProgress size={24} color="inherit" /> : <Send />}
+              </Button>
+            </Box>
+            <Typography variant="caption" color="textSecondary" sx={{ mt: 1 }}>
               {inputValue.length}/{chatConfig.maxMessageLength}
-            </div>
-          </div>
-        </div>
+            </Typography>
+          </StyledInput>
+        </StyledPaper>
       )}
       {/* Toggle Button */}
-      <button
+      <Button
+        variant="contained"
+        color="primary"
         onClick={toggleChatbot}
-        className="w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 transition-colors flex items-center justify-center"
         aria-label={isOpen ? 'Close chat' : 'Open chat'}
+        sx={{
+          width: 56,
+          height: 56,
+          borderRadius: '50%',
+          boxShadow: theme.shadows[3],
+          transition: theme.transitions.create('background-color'),
+          '&:hover': {
+            backgroundColor: theme.palette.primary.dark,
+          },
+        }}
       >
         {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
-      </button>
-    </div>
+      </Button>
+    </Box>
   );
 };
 

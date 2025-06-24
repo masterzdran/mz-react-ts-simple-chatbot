@@ -1,25 +1,28 @@
 // src/components/SecureChatbot/MessageBubble.tsx
 
 import React from 'react';
-import { Message } from './SecureChatbot.types';
+import type { Message } from './SecureChatbot.types';
 
 interface MessageBubbleProps {
   message: Message;
 }
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
+  let bubbleClass = '';
+  if (message.sender === 'user') {
+    bubbleClass = 'bg-blue-600 text-white';
+  } else if (message.status === 'error') {
+    bubbleClass = 'bg-red-100 text-red-800';
+  } else {
+    bubbleClass = 'bg-gray-100 text-gray-800';
+  }
+
   return (
     <div
       className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
     >
       <div
-        className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
-          message.sender === 'user'
-            ? 'bg-blue-600 text-white'
-            : message.status === 'error'
-            ? 'bg-red-100 text-red-800'
-            : 'bg-gray-100 text-gray-800'
-        }`}
+        className={`max-w-xs px-3 py-2 rounded-lg text-sm ${bubbleClass}`}
       >
         {message.content || (message.status === 'sending' && (
           <div className="flex items-center space-x-1">
