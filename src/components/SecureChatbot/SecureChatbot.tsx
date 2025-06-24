@@ -15,7 +15,6 @@ import {
   Typography,
   CircularProgress,
   Paper,
-  ThemeProvider,
   useTheme,
   styled,
 } from '@mui/material';
@@ -117,8 +116,8 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
   // Secure API call
   const sendMessageToAPI = useCallback(async (message: string): Promise<string> => {
 
-    // TODO: Implement logic
-     //return SecurityUtils.sanitizeHtml(message);;
+    // // TODO: Implement logic
+    // return SecurityUtils.sanitizeHtml(message);;
 
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -341,7 +340,7 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
               </Typography>
             )}
             {messages.map((message) => (
-              <MessageBubble key={message.id} message={message} />
+              <MessageBubble key={message.id} message={message} assistantIcon={chatConfig.assistantIcon} />
             ))}
             <div ref={messagesEndRef} />
           </StyledMessages>

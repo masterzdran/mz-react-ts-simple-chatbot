@@ -17,10 +17,13 @@ export interface Message {
     };
     allowedOrigins?: string[];
     csrfToken?: string;
+    defaultMaximized?: boolean;
+    assistantIcon?: React.ReactNode; // Add assistantIcon to config
   }
   
   export interface ChatbotProps {
     config?: ChatbotConfig;
     onError?: (error: Error) => void;
     onMessageSent?: (message: string) => void;
+    onMaximizeChange?: (isMaximized: boolean) => void;
   }

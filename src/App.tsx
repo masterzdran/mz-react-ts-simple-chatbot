@@ -1,6 +1,7 @@
 // src/App.tsx
 import React from 'react';
 import SecureChatbot from './components/SecureChatbot/SecureChatbot';
+import Avatar from '@mui/material/Avatar';
 
 function App() {
   const handleChatError = (error: Error) => {
@@ -21,13 +22,13 @@ function App() {
       </header>
       <SecureChatbot
         config={{
-          apiEndpoint: '/your-custom-chat-api', // Replace with your actual API endpoint
+          apiEndpoint: '/api/chat',
           maxMessageLength: 500,
           rateLimit: {
             maxMessages: 5,
-            windowMs: 30000, // 30 seconds
+            windowMs: 30000,
           },
-          // csrfToken: 'your-csrf-token-here', // If you're using CSRF protection
+          assistantIcon: <Avatar>A</Avatar>, // Example: Material-UI Avatar
         }}
         onError={handleChatError}
         onMessageSent={handleMessageSent}
