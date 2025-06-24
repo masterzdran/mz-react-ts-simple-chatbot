@@ -1,8 +1,8 @@
 // src/components/SecureChatbot/SecureChatbot.tsx
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Send, MessageCircle, X, Shield, AlertTriangle } from 'lucide-react';
-import { Message, ChatbotProps } from './SecureChatbot.types';
+import { Send, MessageCircle, X, Shield, AlertTriangle, Maximize2, Minimize2 } from 'lucide-react';
+import type { Message, ChatbotProps } from './SecureChatbot.types';
 import { DEFAULT_CHATBOT_CONFIG } from './SecureChatbot.constants';
 import { SecurityUtils } from './SecureChatbot.utils';
 import { useRateLimit } from './useRateLimit.hook';
@@ -15,6 +15,7 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
 }) => {
   // State management
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isMaximized, setIsMaximized] = useState<boolean>(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -73,7 +74,7 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
   const sendMessageToAPI = useCallback(async (message: string): Promise<string> => {
 
     // TODO: Implement logic
-     return SecurityUtils.sanitizeHtml(message);;
+     //return SecurityUtils.sanitizeHtml(message);;
 
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -212,6 +213,12 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
     setIsOpen(prev => !prev);
   }, []);
 
+  // Toggle maximize/minimize
+  const toggleMaximize = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event from bubbling up
+    setIsMaximized(prev => !prev);
+  }, []);
+
   // Status icon based on connection
   const StatusIcon = useMemo(() => {
     switch (connectionStatus) {
@@ -228,20 +235,35 @@ const SecureChatbot: React.FC<ChatbotProps> = ({
     <div className="fixed bottom-4 right-4 z-50">
       {/* Chat Window */}
       {isOpen && (
-        <div className="mb-4 w-80 h-96 bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col">
+        <div 
+          className={`mb-4 bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col ${
+            isMaximized 
+              ? 'fixed top-4 left-4 right-4 bottom-20 w-auto h-auto' 
+              : 'w-80 h-96'
+          } transition-all duration-300 ease-in-out`}
+        >
           {/* Header */}
           <div className="flex items-center justify-between p-4 bg-blue-600 text-white rounded-t-lg">
             <div className="flex items-center space-x-2">
               {StatusIcon}
               <h3 className="font-semibold">Support Chat</h3>
             </div>
-            <button
-              onClick={toggleChatbot}
-              className="text-white hover:text-gray-200 transition-colors"
-              aria-label="Close chat"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={toggleMaximize}
+                className="text-white hover:text-gray-200 transition-colors"
+                aria-label={isMaximized ? "Minimize chat" : "Maximize chat"}
+              >
+                {isMaximized ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+              </button>
+              <button
+                onClick={toggleChatbot}
+                className="text-white hover:text-gray-200 transition-colors"
+                aria-label="Close chat"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
           {/* Messages */}
           <div className="flex-1 p-4 overflow-y-auto space-y-3">
