@@ -29,6 +29,7 @@ function App() {
             windowMs: 30000,
           },
           assistantIcon: <Avatar>A</Avatar>, // Example: Material-UI Avatar
+           title: "🌟I9 AI🌟",
         }}
         onError={handleChatError}
         onMessageSent={handleMessageSent}

@@ -18,7 +18,8 @@ export interface Message {
     allowedOrigins?: string[];
     csrfToken?: string;
     defaultMaximized?: boolean;
-    assistantIcon?: React.ReactNode; // Add assistantIcon to config
+    assistantIcon?: React.ReactNode;
+    title?: string; // Add title to config
   }
   
   export interface ChatbotProps {
